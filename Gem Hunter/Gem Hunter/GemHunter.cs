@@ -28,6 +28,7 @@ namespace Gem_Hunter
 
         private bool ExitRequested => GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                                       || Keyboard.GetState().IsKeyDown(Keys.Escape);
+        private bool RestartRequested => Keyboard.GetState().IsKeyDown(Keys.R);
 
         public GemHunter()
         {
@@ -67,7 +68,7 @@ namespace Gem_Hunter
             if (ExitRequested)
                 Exit();
 
-            if (roomGenerator.CurrentGems <= 0)
+            if (roomGenerator.CurrentGems <= 0 || RestartRequested)
                 StartNextLevel();
                 
             PlayerInput();
@@ -175,6 +176,7 @@ namespace Gem_Hunter
 
         private void StartNextLevel()
         {
+            roomGenerator.CurrentGems = 0;
             playerPosition = new Vector2(roomGenerator.MapSize / 2, roomGenerator.MapSize / 2);
             roomGenerator.Generate();
         }
