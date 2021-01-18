@@ -38,6 +38,10 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
+            "FontStashSharp.MonoGame": {
+              "target": "Package",
+              "version": "[0.9.2, )"
+            },
             "MonoGame.Content.Builder.Task": {
               "target": "Package",
               "version": "[3.8.0.1641, )"

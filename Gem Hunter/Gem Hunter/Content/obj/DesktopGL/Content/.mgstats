@@ -1,4 +1,2 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
 "D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/Block.png","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/Block.xnb","TextureProcessor","Texture2DContent",92,341,0.1107101
-"D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/Ground.png","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/Ground.xnb","TextureProcessor","Texture2DContent",92,341,0.1372932
-"D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/Wall.png","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/Wall.xnb","TextureProcessor","Texture2DContent",91,341,0.0022038

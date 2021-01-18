@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,19 +12,22 @@ namespace Gem_Hunter
     {
         Floor,
         Wall,
-        Player
+        Gem
     }
     
     public class GemHunter : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        private FontSystem fontSystem;
         private Texture2D block;
         private IRoomGenerator roomGenerator = new RoomGenerator();
-        
+        private Vector2 playerPosition = new Vector2(0, 0);
+        private int score;
+        private Random random = new Random();
+
         private bool ExitRequested => GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                                       || Keyboard.GetState().IsKeyDown(Keys.Escape);
-        private bool RestartRequested => Keyboard.GetState().IsKeyDown(Keys.R);
 
         public GemHunter()
         {
@@ -40,26 +44,33 @@ namespace Gem_Hunter
             graphics.PreferredBackBufferWidth = 1000;
             graphics.PreferredBackBufferHeight = 1000;
             graphics.ApplyChanges();
+
+            //Cap framerate.
+            IsFixedTimeStep = true;
+            TargetElapsedTime = TimeSpan.FromSeconds(1d / 15d);
             
-            roomGenerator.Reset();
+            playerPosition = new Vector2(roomGenerator.MapSize / 2, roomGenerator.MapSize / 2);
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            fontSystem = FontSystemFactory.Create(GraphicsDevice);
+            fontSystem.AddFont(File.ReadAllBytes(@"Content\dogica.ttf"));
             block = Content.Load<Texture2D>("Block");
         }
 
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            
+
             if (ExitRequested)
                 Exit();
 
+            if (roomGenerator.CurrentGems <= 0)
+                StartNextLevel();
+                
             PlayerInput();
-
-            roomGenerator.Update();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -95,11 +106,11 @@ namespace Gem_Hunter
                                     roomGenerator.TileSize, roomGenerator.TileSize), 
                                 new Color(44, 28, 52));
                             break;
-                        case TileType.Player:
+                        case TileType.Gem:
                             spriteBatch.Draw(block, 
                                 new Rectangle(i * roomGenerator.TileSize, j * roomGenerator.TileSize, 
                                     roomGenerator.TileSize, roomGenerator.TileSize), 
-                                new Color(255, 255, 255));
+                                GetGemColor());
                             break;
                         default:
                             throw new InvalidEnumArgumentException("Given tile type is not supported.");
@@ -107,12 +118,23 @@ namespace Gem_Hunter
                 }
             }
             
+            //Render player.
+            spriteBatch.Draw(block,
+                new Rectangle((int) playerPosition.X * roomGenerator.TileSize, 
+                    (int) playerPosition.Y * roomGenerator.TileSize, 
+                    roomGenerator.TileSize, roomGenerator.TileSize), Color.DarkRed);
+            
             spriteBatch.End();
             
             //Render target to back buffer.
             GraphicsDevice.SetRenderTarget(null);
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp);
             spriteBatch.Draw(target, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.White);
+            
+            //Render score.
+            DynamicSpriteFont font = fontSystem.GetFont(18);
+            spriteBatch.DrawString(font, $"Score: {score}", new Vector2(755, 970), Color.White);
+            
             spriteBatch.End();
         }
 
@@ -136,31 +158,41 @@ namespace Gem_Hunter
                 MovePlayer(new Vector2(1, 0));
             }
         }
-        
-        private Vector2 GetPlayerPosition()
-        {
-            for (int i = 0; i < roomGenerator.TileMap.GetLength(0); i++)
-            {
-                for (int j = 0; j < roomGenerator.TileMap.GetLength(1); j++)
-                {
-                    if (roomGenerator.TileMap[i, j] == TileType.Player)
-                        return new Vector2(i, j);
-                }
-            }
-            
-            throw new InvalidOperationException("There is no player in the map.");
-        }
 
         private void MovePlayer(Vector2 movement)
         {
-            var playerPosition = GetPlayerPosition();
             var newPosition = playerPosition + movement;
 
             if (roomGenerator.AvailableForPlayer(newPosition))
             {
-                roomGenerator.TileMap[(int) playerPosition.X, (int) playerPosition.Y] = TileType.Floor;
-                roomGenerator.TileMap[(int) newPosition.X, (int) newPosition.Y] = TileType.Player;
+                if (roomGenerator.TileMap[(int) newPosition.X, (int) newPosition.Y] == TileType.Gem)
+                {
+                    CollectGem(newPosition);
+                }
+                playerPosition = newPosition;
             }
         }
+
+        private void StartNextLevel()
+        {
+            playerPosition = new Vector2(roomGenerator.MapSize / 2, roomGenerator.MapSize / 2);
+            roomGenerator.Generate();
+        }
+
+        private void CollectGem(Vector2 position)
+        {
+            roomGenerator.TileMap[(int) position.X, (int) position.Y] = TileType.Floor;
+
+            score += 10;
+            roomGenerator.CurrentGems--;
+        }
+        
+        private Color GetGemColor() =>
+            random.Next(2) switch
+            {
+                0 => Color.Aquamarine,
+                1 => Color.Blue,
+                _ => Color.Purple
+            };
     }
 }

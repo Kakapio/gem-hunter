@@ -8,11 +8,11 @@ namespace Gem_Hunter
     {
         public Boolean IsLegalPosition(Vector2 position);
         public Boolean AvailableForPlayer(Vector2 position);
-        public void Update();
-        public void Reset();
+        public void Generate();
         
         public TileType[,] TileMap { get; }
         public int CurrentFloors { get; set; }
+        public int CurrentGems { get; set; }
         public int MapSize { get; }
         public int TileSize { get; }
     }
