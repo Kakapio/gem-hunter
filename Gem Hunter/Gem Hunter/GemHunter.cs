@@ -3,8 +3,10 @@ using System.ComponentModel;
 using System.IO;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace Gem_Hunter
 {
@@ -21,14 +23,18 @@ namespace Gem_Hunter
         private SpriteBatch spriteBatch;
         private FontSystem fontSystem;
         private Texture2D block;
+        private Song song;
+        private SoundEffect gotGem;
         private IRoomGenerator roomGenerator = new RoomGenerator();
         private Vector2 playerPosition = new Vector2(0, 0);
+        private int currentPlayerColor = 0;
         private int score;
         private Random random = new Random();
 
         private bool ExitRequested => GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                                       || Keyboard.GetState().IsKeyDown(Keys.Escape);
         private bool RestartRequested => Keyboard.GetState().IsKeyDown(Keys.R);
+        private bool ColorChangeRequested => Keyboard.GetState().IsKeyDown(Keys.C);
 
         public GemHunter()
         {
@@ -51,6 +57,7 @@ namespace Gem_Hunter
             TargetElapsedTime = TimeSpan.FromSeconds(1d / 15d);
             
             playerPosition = new Vector2(roomGenerator.MapSize / 2, roomGenerator.MapSize / 2);
+            MediaPlayer.Play(song);
         }
 
         protected override void LoadContent()
@@ -59,6 +66,8 @@ namespace Gem_Hunter
             fontSystem = FontSystemFactory.Create(GraphicsDevice);
             fontSystem.AddFont(File.ReadAllBytes(@"Content\dogica.ttf"));
             block = Content.Load<Texture2D>("Block");
+            song = Content.Load<Song>("diamond_song");
+            gotGem = Content.Load<SoundEffect>("got_diamond");
         }
 
         protected override void Update(GameTime gameTime)
@@ -70,8 +79,28 @@ namespace Gem_Hunter
 
             if (roomGenerator.CurrentGems <= 0 || RestartRequested)
                 StartNextLevel();
-                
+
+            if (ColorChangeRequested)
+            {
+                ChangePlayerColor();
+            }
+            
+            LoopSong();
             PlayerInput();
+        }
+
+        private void ChangePlayerColor()
+        {
+            if (currentPlayerColor >= 7)
+                currentPlayerColor = 0;
+            else
+                currentPlayerColor++;
+        }
+
+        private void LoopSong()
+        {
+            if (MediaPlayer.State == MediaState.Stopped)
+                MediaPlayer.Play(song);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -123,7 +152,7 @@ namespace Gem_Hunter
             spriteBatch.Draw(block,
                 new Rectangle((int) playerPosition.X * roomGenerator.TileSize, 
                     (int) playerPosition.Y * roomGenerator.TileSize, 
-                    roomGenerator.TileSize, roomGenerator.TileSize), Color.DarkRed);
+                    roomGenerator.TileSize, roomGenerator.TileSize), GetPlayerColor(currentPlayerColor));
             
             spriteBatch.End();
             
@@ -184,7 +213,7 @@ namespace Gem_Hunter
         private void CollectGem(Vector2 position)
         {
             roomGenerator.TileMap[(int) position.X, (int) position.Y] = TileType.Floor;
-
+            gotGem.Play();
             score += 10;
             roomGenerator.CurrentGems--;
         }
@@ -192,9 +221,34 @@ namespace Gem_Hunter
         private Color GetGemColor() =>
             random.Next(2) switch
             {
-                0 => Color.Aquamarine,
-                1 => Color.Blue,
+                0 => new Color(255, 234, 0),
+                1 => new Color(252, 255, 194),
                 _ => Color.Purple
             };
+
+        private Color GetPlayerColor(int current)
+        {
+            switch (current)
+            {
+                    case 0:
+                        return Color.DodgerBlue;
+                    case 1:
+                        return Color.Fuchsia;
+                    case 2:
+                        return Color.Green;
+                    case 3:
+                        return Color.DarkRed;
+                    case 4:
+                        return Color.Olive;
+                    case 5:
+                        return Color.SeaGreen;
+                    case 6:
+                        return Color.Orange;
+                    case 7:
+                        return Color.Coral;
+                    default:
+                        return Color.White;
+            }
+        }
     }
 }

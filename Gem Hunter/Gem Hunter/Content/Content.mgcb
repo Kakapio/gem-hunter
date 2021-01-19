@@ -25,3 +25,15 @@
 /processorParam:TextureFormat=Color
 /build:Block.png
 
+#begin coin.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:coin.wav;got_diamond.wav
+
+#begin roshan_diamond_finding_2.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:roshan_diamond_finding_2.mp3;diamond_song.mp3
+

@@ -1,2 +1,4 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
 "D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/Block.png","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/Block.xnb","TextureProcessor","Texture2DContent",92,341,0.1107101
+"D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/coin.wav","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/got_diamond.xnb","SoundEffectProcessor","SoundEffectContent",71496,71557,0.3495579
+"D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/roshan_diamond_finding_2.mp3","D:/Documents/Repositories/gem-hunter/Gem Hunter/Gem Hunter/Content/bin/DesktopGL/Content/diamond_song.xnb","SongProcessor","SongContent",4116968,130,1.466255
